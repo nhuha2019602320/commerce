@@ -1,14 +1,15 @@
 import { data } from "autoprefixer";
 import axios from "axios";
 import { imageConfigDefault } from "next/dist/shared/lib/image-config";
-import router, { Router } from "next/router";
+import router, { Router, useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { PostProduct } from "../../services/product";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import MenuBar from "../TipTap/MenuBar";
+import { useParams } from "react-router-dom";
 
-const Product = () => {
+const EditProduct = () => {
   const [fileSelect, setFileSelect] = useState<File>();
   const [nameProduct, setNameProduct] = useState<string>("");
   const [price, setPrice] = useState<string>("");
@@ -17,12 +18,18 @@ const Product = () => {
   const [description, setDescription] = useState<string>("");
   const [urlImg, setUrlImg] = useState<string>("");
   const [detail, setDetail] = useState<string>("");
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!router.isReady) return;
+      localStorage.setItem("idProduct", router.query.id?.toString() ?? '');
+  }, [router.isReady]);
 
   const editor = useEditor({
     extensions: [StarterKit],
     content: `
-        Detail product
-    `,
+          Detail product
+      `,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       setDetail(html);
@@ -46,9 +53,10 @@ const Product = () => {
 
   const handleUpload = () => {
     axios({
-      method: "post",
-      url: `${process.env.NEXT_PUBLIC_FRONTEND_HOST}/api/product/createNewProduct`,
+      method: "put",
+      url: `${process.env.NEXT_PUBLIC_FRONTEND_HOST}/api/product/updateProduct`,
       data: {
+        id: localStorage.getItem('idProduct'),
         nameProduct: nameProduct,
         price: price,
         material: material,
@@ -57,10 +65,8 @@ const Product = () => {
         urlImg: localStorage.getItem("img"),
         detail: detail,
       },
-    })
-    router.push("/postProduct")
+    });
     localStorage.clear();
-    
   };
   return (
     <div className="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 items-center">
@@ -149,16 +155,16 @@ const Product = () => {
           >
             Up Image
           </button>
-        <button
-          onClick={handleUpload}
-          className=" flex bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded items-center"
-        >
-          Post
-        </button>
+          <button
+            onClick={handleUpload}
+            className=" flex bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded items-center"
+          >
+            Update
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default Product;
+export default EditProduct;

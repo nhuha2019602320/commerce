@@ -1,93 +1,79 @@
-import { StarIcon } from '@heroicons/react/solid'
-
-const products = [
-  {
-    id: 1,
-    name: 'Organize Basic Set (Walnut)',
-    price: '$149',
-    rating: 5,
-    reviewCount: 38,
-    imageSrc: 'https://res.cloudinary.com/uploadimgvvv/image/upload/v1661185380/f28oaeeobwbozhb2g3bp.jpg',
-    imageAlt: 'TODO',
-    href: '#',
-  },
-  {
-    id: 2,
-    name: 'Organize Pen Holder',
-    price: '$15',
-    rating: 5,
-    reviewCount: 18,
-    imageSrc: 'https://res.cloudinary.com/uploadimgvvv/image/upload/v1661185379/quiwkj4agka8qlfxjgcf.jpg',
-    imageAlt: 'TODO',
-    href: '#',
-  },
-  {
-    id: 3,
-    name: 'Organize Sticky Note Holder',
-    price: '$15',
-    rating: 5,
-    reviewCount: 14,
-    imageSrc: 'https://res.cloudinary.com/uploadimgvvv/image/upload/v1661185379/uzh5xgaajr3rreoo4rrd.jpg',
-    imageAlt: 'TODO',
-    href: '#',
-  },
-  {
-    id: 4,
-    name: 'Organize Phone Holder',
-    price: '$15',
-    rating: 4,
-    reviewCount: 21,
-    imageSrc: 'https://res.cloudinary.com/uploadimgvvv/image/upload/v1661185378/m0onokcrropupdwzdyi5.jpg',
-    imageAlt: 'TODO',
-    href: '#',
-  },
-  // More products...
-]
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+import { StarIcon } from "@heroicons/react/solid";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import parse from "html-react-parser";
+import { DeleteProduct } from "../../services/product";
+import router from "next/router";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import Header from '../HomePage/Header'
+import HomePageClient from "./HomePageClient";
+interface ProductType {
+  id: string,
+  image: string,
+  nameProduct: string,
+  material: string,
+  price: string
 }
 
 export default function Example() {
+  const [listProduct, setListProduct] = useState([]);
+  const router = useRouter();
+  useEffect(() => {
+    const res = axios
+      .get(`${process.env.NEXT_PUBLIC_FRONTEND_HOST}/api/product/getAllProduct`)
+      .then((res) => setListProduct(res.data));
+  }, []);
+
+  const handleDelete = (id:string) => {
+    DeleteProduct(id).then(() => {router.push('/homePage')})
+  }
+
+  const handleEditProduct = (id: string) => { 
+    console.log(router.query);
+  }
+
   return (
     <div className="bg-white">
-      <div className="max-w-7xl mx-auto overflow-hidden sm:px-6 lg:px-8">
-        <h2 className="sr-only">Products</h2>
-
-        <div className="-mx-px border-l border-gray-200 grid grid-cols-2 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => (
-            <div key={product.id} className="group relative p-4 border-r border-b border-gray-200 sm:p-6">
-              <div className="rounded-lg overflow-hidden bg-gray-200 aspect-w-1 aspect-h-1 group-hover:opacity-75">
-                <img
-                  src={product.imageSrc}
-                  alt={product.imageAlt}
-                  className="w-full h-full object-center object-cover"
-                />
-              </div>
-              <div className="pt-10 pb-4 text-center">
-                <h3 className="text-sm font-medium text-gray-900">
-                  <a href={product.href}>
-                    <span aria-hidden="true" className="absolute inset-0" />
-                    {product.name}
-                  </a>
-                </h3>
-                <div className="mt-3 flex flex-col items-center">
-                  <p className="sr-only">{product.rating} out of 5 stars</p>
-                  <div className="flex items-center">
-                    {[0, 1, 2, 3, 4].map((rating) => (
-                      <StarIcon
-                        key={rating}
-                        className={classNames(
-                          product.rating > rating ? 'text-yellow-400' : 'text-gray-200',
-                          'flex-shrink-0 h-5 w-5'
-                        )}
-                        aria-hidden="true"
-                      />
-                    ))}
-                  </div>
-                  <p className="mt-1 text-sm text-gray-500">{product.reviewCount} reviews</p>
+      <Header/>
+      <HomePageClient/>
+      <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
+        <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
+          {listProduct.map((product) => (
+            <div key={product.id}>
+              <div className="relative">
+                <div className="relative h-72 w-full overflow-hidden rounded-lg">
+                  <img
+                    src={product.image}
+               
+                    className="h-full w-full object-cover object-center"
+                  />
                 </div>
-                <p className="mt-4 text-base font-medium text-gray-900">{product.price}</p>
+                <div className="relative mt-4">
+                  <h3 className="text-sm font-medium text-gray-900">{product.nameProduct}</h3>
+                  <p className="mt-1 text-sm text-gray-500">{product.material}</p>
+                </div>
+                <div className="absolute inset-x-0 top-0 flex h-72 items-end justify-end overflow-hidden rounded-lg p-4">
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black opacity-50"
+                  />
+                  <p className="relative text-lg font-semibold text-white">{product.price}</p>
+                </div>
+              </div>
+              <div className="mt-6 flex w-full">
+                <button onClick={() => handleDelete(product.id)}
+                  className="relative flex items-center justify-center rounded-md border border-transparent bg-gray-100 py-2 px-8 text-sm font-medium text-gray-900 hover:bg-gray-200"
+                >
+                  Delete Product
+                </button>
+                <button onClick={() => handleEditProduct(product.id)}
+                  className="relative flex items-center justify-center rounded-md border border-transparent bg-gray-100 py-2 px-8 text-sm font-medium text-gray-900 hover:bg-gray-200"
+                >
+                  <Link href={{ pathname: "/updateProduct/", query: { id: product.id } }}>
+                  Edit Product
+                  </Link>
+                </button>
               </div>
             </div>
           ))}

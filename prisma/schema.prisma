@@ -22,8 +22,8 @@ model User {
 
 model Product {
   id            String  @id @default(cuid())
-  nameProduct   String  @unique
-  price         String  @unique
+  nameProduct   String?  
+  price         String? 
   material      String?
   color         String?
   description   String?

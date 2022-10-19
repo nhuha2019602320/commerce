@@ -9,13 +9,14 @@ const LoginHome = () => {
 
   const handleLogin = () => {
     if(!email || !password) {
-      alert("Ple")
+      alert("Login Fail")
     }
     const data = {
       email: email,
       password: password
     }
     LoginAccount(data).then(() => {router.push('/homePage')}).catch((err) => alert("Login fail"))
+
     setEmail('')
     setPassword('')
   }

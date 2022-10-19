@@ -19,16 +19,20 @@ export default async function login(req: NextApiRequest, res: NextApiResponse) {
     userLogin?.password || ""
   );
   if (!passwordLogin) res.status(400).send("Password incorrect");
-  else {
-    const token = jwt.sign(
-      { 
-        id: userLogin?.id, 
-        email: userLogin?.email,
-    },
-      secret
-    );
-    console.log("token", token);
-    res.setHeader("Set-Cookie", serialize("token", token));
-    res.status(200).send(userLogin);
-  }
+  else { 
+    if(userLogin?.admin === true) {
+      const token = jwt.sign(
+        { 
+          id: userLogin?.id, 
+          email: userLogin?.email,
+          authorities: userLogin?.admin
+      },
+        secret
+      );
+      console.log("token", token);
+      res.setHeader("Set-Cookie", serialize("token", token));
+      res.status(200).send(userLogin);
+    } else 
+      console.log("you don't allow to access")
+    }
 }
